@@ -45,6 +45,10 @@ public:
 
 	void DrawFram() const;	//绘制边框
 	void ShowInfo() const;	//显示游戏信息
+
+private:
+	bool IsPiontInSnake(const Point& point);		//判断一个点是否位于蛇的身体中
+
 };
 
 CSnake::CSnake()
@@ -132,25 +136,47 @@ bool CSnake::CreateFood()
 	if (m_snake.size() >= WIDTH*HIGHT)		//当蛇身体长度大于或等于界面格子数时无法生成食物，返回false
 		return false;
 	bool food_illegal;		//食物位置是非法标志
+
+	int cell_num = WIDTH * HIGHT - m_snake.size();		//合法的食物位置数量
+	//生成食物位置的索引
 	SYSTEMTIME current_time;
-	while (true)
+	GetLocalTime(&current_time);			//获取当前时间
+	srand(current_time.wMilliseconds);		//用当前时间的毫秒数设置产生随机数的种子
+	int food_index = rand() % cell_num;
+	int cur_index = -1;
+
+	//计算可用的格子中第food_index个格子的具体位置
+	for (int i = 0; i < WIDTH; i++)
 	{
-		GetLocalTime(&current_time);			//获取当前时间
-		srand(current_time.wMilliseconds);		//用当前时间的毫秒数设置产生随机数的种子
-		food_illegal = false;
-		m_food.x = rand() % WIDTH;
-		m_food.y = rand() % HIGHT;
-		for (auto& point : m_snake)
+		for (int j = 0; j < HIGHT; j++)
 		{
-			if (point == m_food)
+			if (!IsPiontInSnake(Point(i, j)))
+				cur_index++;
+			if (cur_index >= food_index)
 			{
-				food_illegal = true;	//如果当前蛇身体中有任何一个点是食物的位置，则食物位置不合法
-				break;
+				m_food = Point(i, j);
+				return true;
 			}
 		}
-		if (!food_illegal) break;
 	}
-	return true;
+
+	return false;
+	//while (true)
+	//{
+	//	food_illegal = false;
+	//	m_food.x = rand() % WIDTH;
+	//	m_food.y = rand() % HIGHT;
+	//	for (auto& point : m_snake)
+	//	{
+	//		if (point == m_food)
+	//		{
+	//			food_illegal = true;	//如果当前蛇身体中有任何一个点是食物的位置，则食物位置不合法
+	//			break;
+	//		}
+	//	}
+	//	if (!food_illegal) break;
+	//}
+	//return true;
 }
 
 void CSnake::DrawFood()
@@ -219,4 +245,15 @@ void CSnake::ShowInfo() const
 	PrintInt(m_score, 3, 1, CYAN);
 	PrintString(L"等级：", 6, 1, WHITE);
 	PrintInt(m_level, 9, 1, CYAN);
+}
+
+bool CSnake::IsPiontInSnake(const Point & point)
+{
+	for (auto& a_point : m_snake)
+	{
+		if (a_point == point)
+		{
+			return true;
+		}
+	}
 }
