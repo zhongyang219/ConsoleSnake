@@ -135,7 +135,6 @@ bool CSnake::CreateFood()
 {
 	if (m_snake.size() >= WIDTH*HIGHT)		//当蛇身体长度大于或等于界面格子数时无法生成食物，返回false
 		return false;
-	bool food_illegal;		//食物位置是非法标志
 
 	int cell_num = WIDTH * HIGHT - m_snake.size();		//合法的食物位置数量
 	//生成食物位置的索引
@@ -161,22 +160,6 @@ bool CSnake::CreateFood()
 	}
 
 	return false;
-	//while (true)
-	//{
-	//	food_illegal = false;
-	//	m_food.x = rand() % WIDTH;
-	//	m_food.y = rand() % HIGHT;
-	//	for (auto& point : m_snake)
-	//	{
-	//		if (point == m_food)
-	//		{
-	//			food_illegal = true;	//如果当前蛇身体中有任何一个点是食物的位置，则食物位置不合法
-	//			break;
-	//		}
-	//	}
-	//	if (!food_illegal) break;
-	//}
-	//return true;
 }
 
 void CSnake::DrawFood()
@@ -256,4 +239,5 @@ bool CSnake::IsPiontInSnake(const Point & point)
 			return true;
 		}
 	}
+	return false;
 }
