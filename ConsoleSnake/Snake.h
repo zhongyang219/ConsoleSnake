@@ -47,7 +47,7 @@ public:
 	void ShowInfo() const;	//显示游戏信息
 
 private:
-	bool IsPiontInSnake(const Point& point);		//判断一个点是否位于蛇的身体中
+	bool IsPiontInSnake(const Point& point, bool exclude_head = false) const;		//判断一个点是否位于蛇的身体中，exclude_head：是否排除头部
 
 };
 
@@ -202,7 +202,13 @@ inline int CSnake::GetIntervalTime() const
 
 bool CSnake::GaneOver() const
 {
-	return m_snake.front().x >= WIDTH || m_snake.front().x < 0 || m_snake.front().y >= HIGHT || m_snake.front().y < 0;
+	if(m_snake.front().x >= WIDTH || m_snake.front().x < 0 || m_snake.front().y >= HIGHT || m_snake.front().y < 0)		//蛇的头碰到了边框，则游戏结束
+		return true;
+
+	if (IsPiontInSnake(m_snake.front(), true))		//蛇的头碰到了身体，则游戏结束
+		return true;
+
+	return false;
 }
 
 void CSnake::DrawFram() const
@@ -230,11 +236,12 @@ void CSnake::ShowInfo() const
 	PrintInt(m_level, 9, 1, CYAN);
 }
 
-bool CSnake::IsPiontInSnake(const Point & point)
+bool CSnake::IsPiontInSnake(const Point & point, bool exclude_head) const
 {
-	for (auto& a_point : m_snake)
+	auto iter = (exclude_head ? m_snake.begin() + 1 : m_snake.begin());
+	for (; iter != m_snake.end(); ++iter)
 	{
-		if (a_point == point)
+		if (*iter == point)
 		{
 			return true;
 		}
