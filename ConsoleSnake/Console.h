@@ -7,6 +7,15 @@
 
 HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
+//字义一些制表符
+const wchar_t CELL_V = L'┃';       //vertical
+const wchar_t CELL_H = L'━';       //horizental
+const wchar_t CELL_TL = L'┏';      //top left
+const wchar_t CELL_TR = L'┓';      //top right
+const wchar_t CELL_BL = L'┗';      //botton left
+const wchar_t CELL_BR = L'┛';      //botton right
+const wchar_t CELL_SQUARE = L'■';  //实心方块
+
 //计算一个宽字节字符串的长度占用的半角字符数
 size_t WcharStrHalfWidthLen(const wchar_t* str)
 {
@@ -23,13 +32,13 @@ size_t WcharStrHalfWidthLen(const wchar_t* str)
 }
 
 //在x,y坐标处输一个格子
-void PrintCell(short x, short y, Color color)
+void PrintCell(short x, short y, Color color, wchar_t ch = CELL_SQUARE)
 {
 	COORD pos;
 	ULONG unuse;
 	pos.X = x * 2;
 	pos.Y = y;
-	WriteConsoleOutputCharacterW(handle, L"■", 1, pos, &unuse);
+	WriteConsoleOutputCharacterW(handle, &ch, 1, pos, &unuse);
 	FillConsoleOutputAttribute(handle, color, 2, pos, &unuse);
 }
 

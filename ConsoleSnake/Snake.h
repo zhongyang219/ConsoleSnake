@@ -6,6 +6,7 @@ using std::deque;
 
 class CSnake
 {
+public:
 	struct Point
 	{
 		int x;
@@ -45,6 +46,9 @@ public:
 
 	void DrawFram() const;	//绘制边框
 	void ShowInfo() const;	//显示游戏信息
+
+    static wchar_t CheckPointsShape(Point last, Point current, Point next);       //判断三个连在一起的点的形状
+    static wchar_t CheckPointsShape(Point last, Point current);
 
 private:
 	bool IsPiontInSnake(const Point& point, bool exclude_head = false) const;		//判断一个点是否位于蛇的身体中，exclude_head：是否排除头部
@@ -93,12 +97,28 @@ void CSnake::SnakeForward()
 
 void CSnake::DrawSnake() const
 {
-	for (auto& point : m_snake)
+    for (auto iter = m_snake.begin(); iter != m_snake.end(); iter++)
 	{
-		if (point == m_snake.front())
-			PrintCell(point.x + BOARD_X, point.y + BOARD_Y, RED);
+        Point cur_point = *iter;
+		if (cur_point == m_snake.front())
+        {
+            PrintCell(cur_point.x + BOARD_X, cur_point.y + BOARD_Y, RED);
+        }
 		else
-			PrintCell(point.x + BOARD_X, point.y + BOARD_Y, CYAN);
+        {
+            Point last_point = *(iter - 1);
+            wchar_t ch = CELL_SQUARE;
+            if (iter != m_snake.end() - 1)
+            {
+                Point next_point = *(iter + 1);
+                ch = CheckPointsShape(last_point, cur_point, next_point);
+            }
+            else
+            {
+                ch = CheckPointsShape(last_point, cur_point);
+            }
+            PrintCell(cur_point.x + BOARD_X, cur_point.y + BOARD_Y, CYAN, ch);
+        }
 	}
 }
 
@@ -248,3 +268,51 @@ bool CSnake::IsPiontInSnake(const Point & point, bool exclude_head) const
 	}
 	return false;
 }
+
+wchar_t CSnake::CheckPointsShape(Point last, Point current, Point next)
+{
+    //计算3个点的最小x和y坐标
+    int min_x = Min3(last.x, current.x, next.x);
+    int min_y = Min3(last.y, current.y, next.y);
+
+    //将3个点移动到最靠近原点的位置
+    last.x -= min_x;
+    last.y -= min_y;
+    current.x -= min_x;
+    current.y -= min_y;
+    next.x -= min_x;
+    next.y -= min_y;
+
+    if (last.y == 0 && current.y == 0 && next.y == 0)
+        return CELL_H;
+    else if (last.x == 0 && current.x == 0 && next.x == 0)
+        return CELL_V;
+    else if ((last == Point(1, 0) && current == Point(0, 0) && next == Point(0, 1)) || (next == Point(1, 0) && current == Point(0, 0) && last == Point(0, 1)))
+        return CELL_TL;
+    else if ((last == Point(0, 0) && current == Point(1, 0) && next == Point(1, 1)) || (next == Point(0, 0) && current == Point(1, 0) && last == Point(1, 1)))
+        return CELL_TR;
+    else if ((last == Point(0, 0) && current == Point(0, 1) && next == Point(1, 1)) || (next == Point(0, 0) && current == Point(0, 1) && last == Point(1, 1)))
+        return CELL_BL;
+    else if ((last == Point(1, 0) && current == Point(1, 1) && next == Point(0, 1)) || (next == Point(1, 0) && current == Point(1, 1) && last == Point(0, 1)))
+        return CELL_BR;
+    else return CELL_SQUARE;
+}
+
+wchar_t CSnake::CheckPointsShape(Point last, Point current)
+{
+    int min_x = min(last.x, current.x);
+    int min_y = min(last.y, current.y);
+
+    last.x -= min_x;
+    last.y -= min_y;
+    current.x -= min_x;
+    current.y -= min_y;
+
+    if (last.y == 0 && current.y == 0)
+        return CELL_H;
+    else if (last.x == 0 && current.x == 0)
+        return CELL_V;
+    else
+        return CELL_SQUARE;
+}
+
